@@ -1,0 +1,11 @@
+Sample ID,RGB Values,Disease,Doctor Name,Hospital Name,Address,City,Contact Number
+1,"(134, 136, 131)",Diabetes,Dr. John Doe,City Hospital,123 Main St,Springfield,(555) 123-4567
+2,"(124, 109, 94)",Hypertension,Dr. Jane Smith,General Health Center,456 Elm St,Riverside,(555) 987-6543
+3,"(200, 180, 50)",Hyperlipidemia,Dr. Emily Clark,Wellness Clinic,789 Oak St,Metropolis,(555) 555-1212
+4,"(50, 100, 150)",Anemia,Dr. Mike Brown,Community Hospital,321 Maple St,Brookside,(555) 321-4321
+5,"(130, 65, 30)",Liver Disease,Dr. Alice White,Central Medical Center,654 Pine St,Grandville,(555) 654-7890
+6,"(95, 85, 155)",Kidney Disease,Dr. David Green,Regional Health System,987 Cedar St,Lakeview,(555) 876-5432
+7,"(175, 50, 85)",Heart Disease,Dr. Linda Blue,Heart Health Institute,111 Birch St,Hilltown,(555) 222-3333
+8,"(145, 100, 60)",Diabetes,Dr. John Doe,City Hospital,123 Main St,Springfield,(555) 123-4567
+9,"(60, 140, 75)",Hypertension,Dr. Jane Smith,General Health Center,456 Elm St,Riverside,(555) 987-6543
+10,"(210, 175, 40)",Hyperlipidemia,Dr. Emily Clark,Wellness Clinic,789 Oak St,Metropolis,(555) 555-1212
