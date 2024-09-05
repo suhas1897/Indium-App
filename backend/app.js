@@ -11,6 +11,7 @@ const Feedback = require("./feedback");
 //const GoogleStrategy = require('passport-google-oauth2').Strategy;
 const Event = require('./event');
 const User=require('./user');
+const Contact = require('./contactus');
 // const session = require("express-session");
 // const passport = require("passport");
 // require("./config/passport");
@@ -40,7 +41,20 @@ app.use(cors());
 app.get("/", (req, res) => {
     res.send({ status: "Started" });
 });
+// Generate a random token
+const generateToken = () => crypto.randomBytes(20).toString('hex');
 
+// Transporter setup for nodemailer (adjust as necessary)
+const transporter = nodemailer.createTransport({
+    service: 'Gmail',
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false, // true for 465, false for other ports
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+    },
+});
 // Update your registration endpoint
 app.post('/register', async (req, res) => {
     const { name, email, phone, address, password, confirm_password } = req.body;
@@ -79,6 +93,7 @@ app.post('/register', async (req, res) => {
 
         // Send email with OTP
         const mailOptions = {
+            from: process.env.EMAIL_USER,
             to: email,
             subject: 'Email Verification OTP',
             text: `Your OTP for email verification is: ${OTP}`,
@@ -88,7 +103,7 @@ app.post('/register', async (req, res) => {
         res.send({ status: "success", data: "User registered. Please verify your email." });
     } catch (error) {
         console.error("Error creating user: ", error);
-        res.status(500).send({ status: "error", data: error.message });
+        res.send({ status: "error", data: error.message });
     }
 });
 // Endpoint to verify OTP
@@ -96,13 +111,13 @@ app.post('/verify-otp', async (req, res) => {
     const { email, otp } = req.body;
 
     if (!email || !otp) {
-        return res.send({ status: "error", data: "Email and OTP are required" });
+        return res.status(400).send({ status: "error", data: "Email and OTP are required" });
     }
 
     try {
         const user = await User.findOne({ email });
         if (!user) {
-            return res.send({ status: "error", data: "User not found" });
+            return res.status(404).send({ status: "error", data: "User not found" });
         }
 
         // Check if OTP matches and is not expired
@@ -119,7 +134,7 @@ app.post('/verify-otp', async (req, res) => {
         res.send({ status: "success", data: "Email verified successfully" });
     } catch (error) {
         console.error("OTP verification error: ", error);
-        res.status(500).send({ status: "error", data: error.message });
+        res.send({ status: "error", data: error.message });
     }
 });
 
@@ -148,22 +163,79 @@ app.post('/login', async (req, res) => {
         res.send({ status: "success", data: "Login successful" });
     } catch (error) {
         console.error("Login error: ", error);
-        res.status(500).send({ status: "error", data: error.message });
+        res.send({ status: "error", data: error.message });
     }
 });
+app.post('/change-password', async (req, res) => {
+    const { email, currentPassword, newPassword } = req.body;
+  
+    try {
+      const user = await User.findOne({ email });
+      if (!user) {
+        return res.send({ status: 'error', data: 'User not found' });
+      }
+  
+      const isMatch = await bcrypt.compare(currentPassword, user.password);
+      if (!isMatch) {
+        return res.send({ status: 'error', data: 'Current password is incorrect' });
+      }
+  
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(newPassword, salt);
+  
+      user.password = hashedPassword;
+      await user.save();
+  
+      res.send({ status: 'success', data: 'Password changed successfully' });
+    } catch (error) {
+      console.error('Error changing password:', error);
+      res.send({ status: 'error', data: 'Server error' });
+    }
+  });
 
-// Generate a random token
-const generateToken = () => crypto.randomBytes(20).toString('hex');
-
-// Transporter setup for nodemailer (adjust as necessary)
-const transporter = nodemailer.createTransport({
-    service: 'Gmail',
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-    },
-});
-
+  app.get('/profile', async (req, res) => {
+    const { email } = req.query;
+  
+    try {
+      const user = await User.findOne({ email });
+      if (!user) {
+        return res.send({ status: 'error', data: 'User not found' });
+      }
+  
+      res.send({
+        status: 'success',
+        data: {
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+        },
+      });
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      res.send({ status: 'error', data: 'Server error' });
+    }
+  });
+  app.post('/contact-us', async (req, res) => {
+    const { name, email, message } = req.body;
+  
+    if (!name || !email || !message) {
+      return res.status(400).send({ status: 'error', data: 'All fields are required' });
+    }
+  
+    try {
+      const newContact = new Contact({
+        name,
+        email,
+        message
+      });
+  
+      await newContact.save();
+      res.send({ status: 'success', data: 'Message sent successfully' });
+    } catch (error) {
+      console.error('Error saving contact message:', error);
+      res.status(500).send({ status: 'error', data: 'Server error' });
+    }
+  });
 // Endpoint to handle forgot password
 app.post('/forgot-password', async (req, res) => {
     const { email } = req.body;
@@ -186,6 +258,7 @@ app.post('/forgot-password', async (req, res) => {
 
         // Send email with OTP
         const mailOptions = {
+            from: process.env.EMAIL_USER,
             to: email,
             subject: 'Password Reset OTP',
             text: `Your OTP for password reset is: ${OTP}`,
