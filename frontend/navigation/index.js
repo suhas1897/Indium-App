@@ -14,6 +14,7 @@ import Calendar from "../screens/(auth)/CalendarScreen";
 import ImageColorPicker from "../components/ImageColorPicker";
 import Maps from "../screens/(auth)/Maps";
 import ProfileScreen from "../screens/(auth)/ProfileScreen";
+import ContactUs from "../screens/(auth)/ContactUs";
 //import VerifyOTPScreen from "../screens/VerifyOTPScreen";
 // import AddPhoto from "../components/AddPhoto";
 
@@ -56,6 +57,7 @@ function RootNavigator() {
       <Stack.Screen name= "ImageColorPicker" component={ImageColorPicker} />
       <Stack.Screen name="Maps" component={Maps} />
       <Stack.Screen name = "Profile" component={ProfileScreen} />
+      <Stack.Screen name="ContactUs" component={ContactUs} />
 
     </Stack.Navigator>
   );
